@@ -22,3 +22,6 @@
 
 # Local rsdk config
 .rsdk.json
+
+# Claude AI
+/.claude

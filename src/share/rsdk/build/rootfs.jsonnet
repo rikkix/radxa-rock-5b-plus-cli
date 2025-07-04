@@ -73,6 +73,23 @@ function(
                 tar Jvcf "%(output_dir)s/seed.tar.xz" -C "%(output_dir)s/seed" .
                 rm -rf "%(output_dir)s/seed"
             ||| % { output_dir: output_dir },
+
+            // Use custom before.txt
+            |||
+                # Copy custom configuration files
+                echo "Copying custom configuration files..."
+
+                # Copy custom before.txt if it exists
+                if [ -f "./config/before.txt" ]; then
+                    cp "./config/before.txt" "$1/config/before.txt"
+                    chmod 644 "$1/config/before.txt"
+                    echo "✓ Copied custom before.txt"
+                else
+                    echo "⚠ Custom before.txt not found, using default"
+                fi
+            |||,
+
+
             // Adding additional customization commands
             // $1 is the mounted rootfs than you can chroot into
             // For example:

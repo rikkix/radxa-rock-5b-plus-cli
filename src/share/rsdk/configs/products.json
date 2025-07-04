@@ -310,7 +310,7 @@
         "product_full_name": "ROCK 5B+",
         "soc": "rk3588",
         "supported_suite": ["bookworm"],
-        "supported_edition": ["kde"]
+        "supported_edition": ["kde", "cli"]
     },
     {
         "product": "rock-5b",

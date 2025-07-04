@@ -47,7 +47,6 @@ else
             "locales",
             "lm-sensors",
             "man-db",
-            "nano",
             "needrestart",
             "ntfs-3g",
             "python3-pip",
@@ -56,6 +55,8 @@ else
             "vim",
             "wget",
             "xz-utils",
+            "neovim",
+            "git",
         ] +
 
         [

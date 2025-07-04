@@ -62,7 +62,7 @@
     "--privileged",
     // Needed for guestfish to accelerate VM for disk operation
     // Usually covered by /dev mapping.
-    // "--device", "/dev/kvm",
+    "--device", "/dev/kvm",
     // Needed to write to raw disks
     "-v", "/dev:/dev"
   ],
