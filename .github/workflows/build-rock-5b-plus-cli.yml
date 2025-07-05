@@ -77,8 +77,8 @@ jobs:
           gpg \
           jsonnet \
           bdebstrap \
-          libguestfs-tools
-
+          libguestfs-tools \
+          gdisk
 
     - name: Build ROCK 5B+ CLI Image
       run: |
@@ -89,7 +89,7 @@ jobs:
 
         # Build only 512-byte sector image (optimal for eMMC/SD cards)
         echo "Building ROCK 5B+ CLI with 512-byte sectors..."
-        src/bin/rsdk rsdk build "${options[@]}" --sector-size 512 --image-name "output.img" rock-5b-plus bookworm cli
+        src/bin/rsdk build "${options[@]}" --sector-size 512 --image-name "output.img" rock-5b-plus bookworm cli
 
     - name: Prepare release assets
       id: prep
