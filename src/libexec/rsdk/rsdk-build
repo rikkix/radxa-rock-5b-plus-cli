@@ -145,10 +145,11 @@ generate_image() {
 	fi
 
 	pushd "$OUTPUT"
-	if [[ -f $RSDK_OPTION_ROOTFS ]]; then
-		./build-image
-	elif [[ -d $RSDK_OPTION_ROOTFS ]]; then
-		sudo ./build-image
+	if [[ -f $RSDK_OPTION_ROOTFS || -d $RSDK_OPTION_ROOTFS ]]; then
+		# some tools may stay in /sbin, and in some cases,
+		# `sudo ./build-image` would fail with "command not found".
+		# Thus we need to alter the PATH.
+		sudo env PATH="$PATH:/sbin:/usr/sbin:/usr/local/sbin" ./build-image
 		sudo chown "$UID:${GID:-$UID}" "$RSDK_OPTION_IMAGE_NAME"
 	else
 		echo "Unrecognized rootfs type for '$RSDK_OPTION_ROOTFS'." >&2

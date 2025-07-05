@@ -26,59 +26,70 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     permissions:
       contents: write
       
     steps:
-    - name: Maximize build space
-      uses: easimon/maximize-build-space@v10
-      with:
-        root-reserve-mb: 24576
-        swap-size-mb: 2048
-        remove-dotnet: true
-        remove-android: true
-        remove-haskell: true
-        remove-codeql: true
-        remove-docker-images: true
+    # - name: Maximize build space
+    #   uses: easimon/maximize-build-space@v10
+    #   with:
+    #     root-reserve-mb: 24576
+    #     swap-size-mb: 2048
+    #     remove-dotnet: true
+    #     remove-android: true
+    #     remove-haskell: true
+    #     remove-codeql: true
+    #     remove-docker-images: true
 
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         submodules: recursive
 
-    - name: Enable KVM group perms
+    # - name: Enable KVM group perms
+    #   run: |
+    #     echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+    #     sudo udevadm control --reload-rules
+    #     sudo udevadm trigger --name-match=kvm
+
+    # - name: Set up QEMU Emulation
+    #   uses: docker/setup-qemu-action@v3
+    #   with:
+    #     image: tonistiigi/binfmt:latest
+
+    # - name: Setup build environment
+    #   uses: devcontainers/ci@v0.3
+    #   with:
+    #     push: never
+    #     runCmd: |
+    #       src/bin/rsdk setup
+    #       src/bin/rsdk welcome
+
+    - name: Install dependencies
       run: |
-        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-        sudo udevadm control --reload-rules
-        sudo udevadm trigger --name-match=kvm
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          git \
+          xz-utils \
+          jq \
+          gpg \
+          jsonnet \
+          bdebstrap \
+          libguestfs-tools
 
-    - name: Set up QEMU Emulation
-      uses: docker/setup-qemu-action@v3
-      with:
-        image: tonistiigi/binfmt:latest
 
-    - name: Setup build environment
-      uses: devcontainers/ci@v0.3
-      with:
-        push: never
-        runCmd: |
-          src/bin/rsdk setup
-          src/bin/rsdk welcome
+    - name: Build ROCK 5B+ CLI Image
+      run: |
+        options=()
+        if [[ "${{ inputs.test_repo }}" == "true" ]]; then
+          options+=("--test-repo")
+        fi
 
-    - name: Build ROCK 5B+ CLI Image (512-byte sectors only)
-      uses: devcontainers/ci@v0.3
-      with:
-        push: never
-        runCmd: |
-          options=()
-          if [[ "${{ inputs.test_repo }}" == "true" ]]; then
-            options+=("--test-repo")
-          fi
-          
-          # Build only 512-byte sector image (optimal for eMMC/SD cards)
-          echo "Building ROCK 5B+ CLI with 512-byte sectors..."
-          src/bin/rsdk shell rsdk build "${options[@]}" --sector-size 512 --image-name "output.img" rock-5b-plus bookworm cli
+        # Build only 512-byte sector image (optimal for eMMC/SD cards)
+        echo "Building ROCK 5B+ CLI with 512-byte sectors..."
+        src/bin/rsdk rsdk build "${options[@]}" --sector-size 512 --image-name "output.img" rock-5b-plus bookworm cli
 
     - name: Prepare release assets
       id: prep
